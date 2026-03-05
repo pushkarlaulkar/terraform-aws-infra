@@ -34,3 +34,9 @@ variable "env_name" {
   description = "Env Name"
   type        = string
 }
+
+variable "oiadmin_password" {
+  description = "The password for the oiadmin user"
+  type        = string
+  sensitive   = true
+}
