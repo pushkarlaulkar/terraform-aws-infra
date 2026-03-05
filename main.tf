@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.34.0"
+      version = "6.34.0" # Explicitly pinned version
     }
     tls = {
       source  = "hashicorp/tls"
@@ -53,6 +53,7 @@ module "oik8s_ec2" {
   worker_node_instance_type   = "t2.large"
   gpu_node_instance_type      = "g5.xlarge"
   env_name                    = var.env_name
+  oiadmin_password            = var.oiadmin_password
 
   # private_subnets_map = module.oik8s_vpc.private_subnets
   public_subnets_map = module.oik8s_vpc.public_subnets
@@ -65,4 +66,5 @@ module "oik8s_nlb" {
   vpc_id              = module.oik8s_vpc.vpc_id
   target_instance_ids = module.oik8s_ec2.control_plane_ids
   env_name            = var.env_name
+}  env_name            = var.env_name
 }
