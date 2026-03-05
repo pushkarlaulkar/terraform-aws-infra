@@ -35,10 +35,28 @@ resource "aws_instance" "control_plane" {
             #!/bin/bash
 
             hostnamectl set-hostname "${var.env_name}-oik8s-control-${count.index}"
-
             echo "127.0.0.1 ${var.env_name}-oik8s-control-${count.index}" >> /etc/hosts
             apt update
             apt install podman -y
+            
+            # User Creation (oiadmin)
+            # -m creates home directory, -s sets the shell
+            useradd -m -s /bin/bash oiadmin
+            echo "oiadmin:${var.oiadmin_password}" | chpasswd
+            usermod -aG sudo oiadmin
+
+            # Sudo Privileges
+            # Using /etc/sudoers.d is safer than editing the main visudo file via script
+            echo "oiadmin ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/oiadmin
+            chmod 0440 /etc/sudoers.d/oiadmin
+
+            # SSH Configuration
+            # Use sed to find and replace the settings
+            sed -i 's/^#*PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+            sed -i 's/^#*KbdInteractiveAuthentication .*/KbdInteractiveAuthentication yes/' /etc/ssh/sshd_config
+            
+            # Restart SSH to apply changes
+            systemctl restart ssh
             EOF
 
   tags = {
@@ -62,10 +80,28 @@ resource "aws_instance" "worker_node" {
             #!/bin/bash
 
             hostnamectl set-hostname "${var.env_name}-oik8s-oicm-${count.index}"
-
             echo "127.0.0.1 ${var.env_name}-oik8s-oicm-${count.index}" >> /etc/hosts
             apt update
             apt install podman -y
+
+            # User Creation (oiadmin)
+            # -m creates home directory, -s sets the shell
+            useradd -m -s /bin/bash oiadmin
+            echo "oiadmin:${var.oiadmin_password}" | chpasswd
+            usermod -aG sudo oiadmin
+
+            # Sudo Privileges
+            # Using /etc/sudoers.d is safer than editing the main visudo file via script
+            echo "oiadmin ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/oiadmin
+            chmod 0440 /etc/sudoers.d/oiadmin
+
+            # SSH Configuration
+            # Use sed to find and replace the settings
+            sed -i 's/^#*PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+            sed -i 's/^#*KbdInteractiveAuthentication .*/KbdInteractiveAuthentication yes/' /etc/ssh/sshd_config
+            
+            # Restart SSH to apply changes
+            systemctl restart ssh
             EOF
 
   tags = {
@@ -89,10 +125,28 @@ resource "aws_instance" "gpu_node" {
             #!/bin/bash
 
             hostnamectl set-hostname "${var.env_name}-oik8s-gpu-${count.index}"
-
             echo "127.0.0.1 ${var.env_name}-oik8s-gpu-${count.index}" >> /etc/hosts
             apt update
             apt install podman -y
+
+            # User Creation (oiadmin)
+            # -m creates home directory, -s sets the shell
+            useradd -m -s /bin/bash oiadmin
+            echo "oiadmin:${var.oiadmin_password}" | chpasswd
+            usermod -aG sudo oiadmin
+
+            # Sudo Privileges
+            # Using /etc/sudoers.d is safer than editing the main visudo file via script
+            echo "oiadmin ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/oiadmin
+            chmod 0440 /etc/sudoers.d/oiadmin
+
+            # SSH Configuration
+            # Use sed to find and replace the settings
+            sed -i 's/^#*PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+            sed -i 's/^#*KbdInteractiveAuthentication .*/KbdInteractiveAuthentication yes/' /etc/ssh/sshd_config
+            
+            # Restart SSH to apply changes
+            systemctl restart ssh
             EOF
 
   tags = {
