@@ -27,5 +27,6 @@ terraform apply \
   -var 'vpc_cidr=10.0.0.0/16' \
   -var 'control_plane_count=1' \
   -var 'gpu_count=1' \
-  -var 'worker_node_count=1'
+  -var 'worker_node_count=1' \
+  -var 'oiadmin_password="Oiai@123!"'
 ```
