@@ -2,10 +2,11 @@
 output "control_plane_ips" {
   description = "Public and Private IPs for Control Plane nodes"
   value = [
-    for instance in aws_instance.control_plane : {
+    for i, instance in aws_instance.control_plane : {
       name       = instance.tags["Name"]
       public_ip  = instance.public_ip
-      private_ip = instance.private_ip
+      primary_private_ip  = instance.private_ip
+      secondary_private_ip = aws_network_interface.control_plane_secondary_nic[i].private_ip
     }
   ]
 }
@@ -14,10 +15,11 @@ output "control_plane_ips" {
 output "worker_node_ips" {
   description = "Public and Private IPs for Worker nodes"
   value = [
-    for instance in aws_instance.worker_node : {
+    for i, instance in aws_instance.worker_node : {
       name       = instance.tags["Name"]
       public_ip  = instance.public_ip
-      private_ip = instance.private_ip
+      primary_private_ip  = instance.private_ip
+      secondary_private_ip = aws_network_interface.worker_node_secondary_nic[i].private_ip
     }
   ]
 }
@@ -26,10 +28,11 @@ output "worker_node_ips" {
 output "gpu_node_ips" {
   description = "Public and Private IPs for GPU nodes"
   value = [
-    for instance in aws_instance.gpu_node : {
+    for i, instance in aws_instance.gpu_node : {
       name       = instance.tags["Name"]
       public_ip  = instance.public_ip
-      private_ip = instance.private_ip
+      primary_private_ip  = instance.private_ip
+      secondary_private_ip = aws_network_interface.gpu_node_secondary_nic[i].private_ip
     }
   ]
 }
