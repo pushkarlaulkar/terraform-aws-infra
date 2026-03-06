@@ -14,12 +14,12 @@ This Terraform Repo will deploy :-
   - GPU VM with NVIDIA A10G ( Ubuntu 24.04 ).
 - **NLB** ( Internet NLB to load balance Kubernetes API Server Port ( 6443 ) among the control plane nodes).
 
-Initialize
+**Initialize**
 ```
 terraform init
 ```
 
-Deploy
+**Deploy**
 ```
 terraform apply \
   -var 'aws_region=us-east-1' \
@@ -29,4 +29,32 @@ terraform apply \
   -var 'gpu_count=1' \
   -var 'worker_node_count=1' \
   -var 'oiadmin_password="Oiai@123!"'
+```
+
+**Output** ( Will show EC2 name, public ip, primary & secondary private ip's )
+```
+control_plane_ips = [
+  {
+    "name" = "demo-oik8s-control-plane-0"
+    "primary_private_ip" = "10.0.0.206"
+    "public_ip" = "54.175.229.134"
+    "secondary_private_ip" = "10.0.0.123"
+  },
+]
+gpu_node_ips = [
+  {
+    "name" = "demo-oik8s-gpu-node-0"
+    "primary_private_ip" = "10.0.0.213"
+    "public_ip" = "18.212.128.227"
+    "secondary_private_ip" = "10.0.0.69"
+  },
+]
+worker_node_ips = [
+  {
+    "name" = "demo-oik8s-worker-node-0"
+    "primary_private_ip" = "10.0.0.68"
+    "public_ip" = "50.16.63.78"
+    "secondary_private_ip" = "10.0.0.211"
+  },
+]
 ```
