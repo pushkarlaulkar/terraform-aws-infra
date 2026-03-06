@@ -185,6 +185,7 @@ resource "aws_instance" "gpu_node" {
             
             # Restart SSH to apply changes
             systemctl restart ssh
+            reboot
             EOF
 
   tags = {
