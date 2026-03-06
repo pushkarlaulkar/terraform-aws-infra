@@ -64,6 +64,25 @@ resource "aws_instance" "control_plane" {
   }
 }
 
+# Define the Secondary Network Interface
+resource "aws_network_interface" "control_plane_secondary_nic" {
+  count     = var.control_plane_count
+  subnet_id = values(var.public_subnets_map)[count.index % length(var.public_subnets_map)]
+
+  security_groups = [var.security_group_id]
+
+  tags = {
+    Name = "${var.env_name}-oik8s-control-plane-secondary-nic-${count.index}"
+  }
+}
+
+resource "aws_network_interface_attachment" "control_plane_secondary_nic_attach" {
+  count                = var.control_plane_count
+  instance_id          = aws_instance.control_plane[count.index].id
+  network_interface_id = aws_network_interface.control_plane_secondary_nic[count.index].id
+  device_index         = 1 # 0 is always the primary/default interface
+}
+
 resource "aws_instance" "worker_node" {
   count         = var.worker_node_count
   ami           = var.ami_id
@@ -109,6 +128,25 @@ resource "aws_instance" "worker_node" {
   }
 }
 
+# Define the Secondary Network Interface
+resource "aws_network_interface" "worker_node_secondary_nic" {
+  count     = var.worker_node_count
+  subnet_id = values(var.public_subnets_map)[count.index % length(var.public_subnets_map)]
+
+  security_groups = [var.security_group_id]
+
+  tags = {
+    Name = "${var.env_name}-oik8s-worker-node-secondary-nic-${count.index}"
+  }
+}
+
+resource "aws_network_interface_attachment" "worker_node_secondary_nic_attach" {
+  count                = var.worker_node_count
+  instance_id          = aws_instance.worker_node[count.index].id
+  network_interface_id = aws_network_interface.worker_node_secondary_nic[count.index].id
+  device_index         = 1 # 0 is always the primary/default interface
+}
+
 resource "aws_instance" "gpu_node" {
   count         = var.gpu_count
   ami           = var.ami_id
@@ -152,4 +190,23 @@ resource "aws_instance" "gpu_node" {
   tags = {
     Name = "${var.env_name}-oik8s-gpu-node-${count.index}"
   }
+}
+
+# Define the Secondary Network Interface
+resource "aws_network_interface" "gpu_node_secondary_nic" {
+  count     = var.gpu_count
+  subnet_id = values(var.public_subnets_map)[count.index % length(var.public_subnets_map)]
+
+  security_groups = [var.security_group_id]
+
+  tags = {
+    Name = "${var.env_name}-oik8s-gpu-node-secondary-nic-${count.index}"
+  }
+}
+
+resource "aws_network_interface_attachment" "gpu_node_secondary_nic_attach" {
+  count                = var.gpu_count
+  instance_id          = aws_instance.gpu_node[count.index].id
+  network_interface_id = aws_network_interface.gpu_node_secondary_nic[count.index].id
+  device_index         = 1 # 0 is always the primary/default interface
 }
