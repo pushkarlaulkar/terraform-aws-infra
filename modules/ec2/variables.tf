@@ -1,3 +1,8 @@
+variable "region" {
+  description = "The AWS region to deploy into"
+  type        = string
+}
+
 variable "ami_id" {
   description = "The AMI ID passed from the root data source"
   type        = string
