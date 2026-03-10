@@ -3,9 +3,9 @@ output "control_plane_ips" {
   description = "Public and Private IPs for Control Plane nodes"
   value = [
     for i, instance in aws_instance.control_plane : {
-      name       = instance.tags["Name"]
-      public_ip  = instance.public_ip
-      primary_private_ip  = instance.private_ip
+      name                 = instance.tags["Name"]
+      public_ip            = instance.public_ip
+      primary_private_ip   = instance.private_ip
       secondary_private_ip = aws_network_interface.control_plane_secondary_nic[i].private_ip
     }
   ]
@@ -16,9 +16,9 @@ output "worker_node_ips" {
   description = "Public and Private IPs for Worker nodes"
   value = [
     for i, instance in aws_instance.worker_node : {
-      name       = instance.tags["Name"]
-      public_ip  = instance.public_ip
-      primary_private_ip  = instance.private_ip
+      name                 = instance.tags["Name"]
+      public_ip            = instance.public_ip
+      primary_private_ip   = instance.private_ip
       secondary_private_ip = aws_network_interface.worker_node_secondary_nic[i].private_ip
     }
   ]
@@ -29,10 +29,21 @@ output "gpu_node_ips" {
   description = "Public and Private IPs for GPU nodes"
   value = [
     for i, instance in aws_instance.gpu_node : {
-      name       = instance.tags["Name"]
-      public_ip  = instance.public_ip
-      primary_private_ip  = instance.private_ip
+      name                 = instance.tags["Name"]
+      public_ip            = instance.public_ip
+      primary_private_ip   = instance.private_ip
       secondary_private_ip = aws_network_interface.gpu_node_secondary_nic[i].private_ip
+    }
+  ]
+}
+
+output "bastion_host_ip" {
+  description = "Public and Private IPs for Bastion host"
+  value = [
+    for i, instance in aws_instance.bastion_host : {
+      name               = instance.tags["Name"]
+      public_ip          = instance.public_ip
+      primary_private_ip = instance.private_ip
     }
   ]
 }
