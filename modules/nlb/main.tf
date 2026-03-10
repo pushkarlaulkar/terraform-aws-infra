@@ -10,13 +10,13 @@ resource "aws_lb" "oik8s_control_plane_nlb" {
   enable_deletion_protection = false
 
   tags = {
-    Name = "${var.env_name}-oik8s-control-plane-nlb"
+    Name = "${var.region}-${var.env_name}-oik8s-control-plane-nlb"
   }
 }
 
 # Create the Target Group for Port 6443
 resource "aws_lb_target_group" "cp_6443_tg" {
-  name     = "${var.env_name}-cp-6443-tg"
+  name     = "${var.region}-${var.env_name}-cp-6443-tg"
   port     = 6443
   protocol = "TCP"
   vpc_id   = var.vpc_id # Ensure you pass your VPC ID to the module
@@ -49,7 +49,9 @@ resource "aws_lb_target_group_attachment" "cp_attachment" {
 }
 
 resource "aws_security_group" "oik8s_nlb_sg" {
-  vpc_id = var.vpc_id
+  name        = "${var.region}-${var.env_name}-oik8s-nlb-sg-allow-6443"
+  description = "Security group for NLB allowing port 6443"
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "Allow Kubernetes API Server traffic"
@@ -68,6 +70,6 @@ resource "aws_security_group" "oik8s_nlb_sg" {
   }
 
   tags = {
-    Name = "${var.env_name}-oik8s-nlb-sg-allow-6443"
+    Name = "${var.region}-${var.env_name}-oik8s-nlb-sg-allow-6443"
   }
 }
