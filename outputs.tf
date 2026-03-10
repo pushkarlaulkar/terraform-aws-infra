@@ -16,6 +16,11 @@ output "gpu_node_ips" {
   value       = module.oik8s_ec2.gpu_node_ips
 }
 
+output "bastion_host_ip" {
+  description = "Public and Private IPs for Bastion host"
+  value       = module.oik8s_ec2.bastion_host_ip
+}
+
 output "nlb_dns_name" {
   description = "API server endpoint"
   value       = "${module.oik8s_nlb.control_plane_nlb_dns}:6443"
