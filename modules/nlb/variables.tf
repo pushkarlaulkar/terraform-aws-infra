@@ -1,3 +1,8 @@
+variable "region" {
+  description = "The AWS region to deploy into"
+  type        = string
+}
+
 variable "public_subnets_map" {
   description = "Map of subnet names to subnet IDs"
   type        = map(string)
