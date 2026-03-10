@@ -93,8 +93,6 @@ resource "aws_route_table_association" "public-rt-association" {
 
 
 resource "aws_default_security_group" "oik8s_default_sg" {
-  name        = "${var.region}-${var.env_name}-oik8s-default-sg-restricted"
-  description = "Default security group with restricted access"
   vpc_id = aws_vpc.oik8s_vpc.id
 
   # Inbound: Allow SSH
@@ -143,84 +141,6 @@ resource "aws_default_security_group" "oik8s_default_sg" {
 #
 #  tags = {
 #    Name = "${var.region}-${var.env_name}-oik8s-regional-nat-gw"
-#  }
-#
-#  # To ensure proper ordering, it must wait for the IGW
-#  depends_on = [aws_internet_gateway.oik8s_igw]
-#}
-#
-## Create a route in your existing private route table
-#resource "aws_route" "private_internet_access" {
-#  # Link it to your previously created private route table
-#  route_table_id = aws_default_route_table.oik8s_private_rt.id
-#
-#  # The destination is the entire internet
-#  destination_cidr_block = "0.0.0.0/0"
-#
-#  # The target is your Regional NAT Gateway
-#  nat_gateway_id = aws_nat_gateway.oik8s_nat_gw.id
-#}  }
-}
-
-# Explicitly associate all Public Subnets
-resource "aws_route_table_association" "public-rt-association" {
-  # We loop through the existing public_subnet resource map
-  for_each = aws_subnet.public_subnet
-
-  subnet_id      = each.value.id
-  route_table_id = aws_route_table.oik8s_public_rt.id
-}
-
-
-resource "aws_default_security_group" "oik8s_default_sg" {
-  vpc_id = aws_vpc.oik8s_vpc.id
-
-  # Inbound: Allow SSH
-  ingress {
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Inbound: Allow Kubernetes API Server
-  ingress {
-    protocol    = "tcp"
-    from_port   = 6443
-    to_port     = 6443
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Outbound: Allow everything to everywhere
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.env_name}-oik8s-default-sg-restricted"
-  }
-}
-
-## Create an Elastic IP for the NAT Gateway
-#resource "aws_eip" "oik8s_nat_eip" {
-#  domain = "vpc"
-#
-#  tags = {
-#    Name = "oik8s-nat-eip"
-#  }
-#}
-#
-## Create the NAT Gateway
-#resource "aws_nat_gateway" "oik8s_nat_gw" {
-#  vpc_id            = aws_vpc.oik8s_vpc.id
-#  connectivity_type = "public"
-#  availability_mode = "regional"
-#
-#  tags = {
-#    Name = "oik8s-regional-nat-gw"
 #  }
 #
 #  # To ensure proper ordering, it must wait for the IGW
