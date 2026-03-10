@@ -41,6 +41,7 @@ module "oik8s_vpc" {
   vpc_name   = "oik8s-vpc"
   cidr_block = var.vpc_cidr
   env_name   = var.env_name
+  region     = var.aws_region
 }
 
 module "oik8s_ec2" {
@@ -58,6 +59,8 @@ module "oik8s_ec2" {
   # private_subnets_map = module.oik8s_vpc.private_subnets
   public_subnets_map = module.oik8s_vpc.public_subnets
   security_group_id  = module.oik8s_vpc.security_group
+
+  region = var.aws_region
 }
 
 module "oik8s_nlb" {
@@ -66,5 +69,5 @@ module "oik8s_nlb" {
   vpc_id              = module.oik8s_vpc.vpc_id
   target_instance_ids = module.oik8s_ec2.control_plane_ids
   env_name            = var.env_name
-}  env_name            = var.env_name
+  region              = var.aws_region
 }
