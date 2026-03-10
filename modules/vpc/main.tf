@@ -8,7 +8,7 @@ resource "aws_vpc" "oik8s_vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "${var.env_name}-${var.vpc_name}"
+    Name = "${var.region}-${var.env_name}-${var.vpc_name}"
   }
 }
 
@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "oik8s_igw" {
   vpc_id = aws_vpc.oik8s_vpc.id
 
   tags = {
-    Name = "${var.env_name}-oik8s-igw"
+    Name = "${var.region}-${var.env_name}-oik8s-igw"
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_subnet" "public_subnet" {
 
   tags = {
     # substr(string, -1, 1) grabs the last character
-    Name = "${var.env_name}-oik8s-public-subnet-${substr(each.value, -1, 1)}"
+    Name = "${var.region}-${var.env_name}-oik8s-public-subnet-${substr(each.value, -1, 1)}"
   }
 }
 
@@ -46,7 +46,7 @@ resource "aws_subnet" "private_subnet" {
   availability_zone = each.value
 
   tags = {
-    Name = "${var.env_name}-oik8s-private-subnet-${substr(each.value, -1, 1)}"
+    Name = "${var.region}-${var.env_name}-oik8s-private-subnet-${substr(each.value, -1, 1)}"
   }
 }
 
@@ -55,7 +55,7 @@ resource "aws_default_route_table" "oik8s_private_rt" {
   default_route_table_id = aws_vpc.oik8s_vpc.default_route_table_id
 
   tags = {
-    Name = "${var.env_name}-oik8s-private-rt"
+    Name = "${var.region}-${var.env_name}-oik8s-private-rt"
   }
 }
 
@@ -78,8 +78,88 @@ resource "aws_route_table" "oik8s_public_rt" {
   }
 
   tags = {
-    Name = "${var.env_name}-oik8s-public-rt"
+    Name = "${var.region}-${var.env_name}-oik8s-public-rt"
   }
+}
+
+# Explicitly associate all Public Subnets
+resource "aws_route_table_association" "public-rt-association" {
+  # We loop through the existing public_subnet resource map
+  for_each = aws_subnet.public_subnet
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.oik8s_public_rt.id
+}
+
+
+resource "aws_default_security_group" "oik8s_default_sg" {
+  name        = "${var.region}-${var.env_name}-oik8s-default-sg-restricted"
+  description = "Default security group with restricted access"
+  vpc_id = aws_vpc.oik8s_vpc.id
+
+  # Inbound: Allow SSH
+  ingress {
+    protocol    = "tcp"
+    from_port   = 22
+    to_port     = 22
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Inbound: Allow Kubernetes API Server
+  ingress {
+    protocol    = "tcp"
+    from_port   = 6443
+    to_port     = 6443
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Outbound: Allow everything to everywhere
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.region}-${var.env_name}-oik8s-default-sg-restricted"
+  }
+}
+
+## Create an Elastic IP for the NAT Gateway
+#resource "aws_eip" "oik8s_nat_eip" {
+#  domain = "vpc"
+#
+#  tags = {
+#    Name = "${var.region}-${var.env_name}-oik8s-nat-eip"
+#  }
+#}
+#
+## Create the NAT Gateway
+#resource "aws_nat_gateway" "oik8s_nat_gw" {
+#  vpc_id            = aws_vpc.oik8s_vpc.id
+#  connectivity_type = "public"
+#  availability_mode = "regional"
+#
+#  tags = {
+#    Name = "${var.region}-${var.env_name}-oik8s-regional-nat-gw"
+#  }
+#
+#  # To ensure proper ordering, it must wait for the IGW
+#  depends_on = [aws_internet_gateway.oik8s_igw]
+#}
+#
+## Create a route in your existing private route table
+#resource "aws_route" "private_internet_access" {
+#  # Link it to your previously created private route table
+#  route_table_id = aws_default_route_table.oik8s_private_rt.id
+#
+#  # The destination is the entire internet
+#  destination_cidr_block = "0.0.0.0/0"
+#
+#  # The target is your Regional NAT Gateway
+#  nat_gateway_id = aws_nat_gateway.oik8s_nat_gw.id
+#}  }
 }
 
 # Explicitly associate all Public Subnets
